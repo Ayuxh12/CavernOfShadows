@@ -6,162 +6,177 @@
 
 using namespace std;
 
-// Inventory system
+// Player inventory
 vector<string> inventory;
 
-// Function to add an item to the inventory
-void addItem(string item) {
+// Adds an item to the player's inventory
+void addItem(const string& item) {
     inventory.push_back(item);
-    cout << "[Inventory] You picked up a " << item << "!\n";
+    cout << "🔹 You picked up a " << item << "!\n";
 }
 
-// Function to check if an item exists in the inventory
-bool hasItem(string item) {
-    for (string i : inventory) {
+// Checks if an item is in the inventory
+bool hasItem(const string& item) {
+    for (const auto& i : inventory) {
         if (i == item) return true;
     }
     return false;
 }
 
-// Save game to a file
+// Save inventory to a file
 void saveGame() {
     ofstream file("savegame.txt");
 
-    if (!file) { // Check if file opened successfully
-        cout << "[Error] Could not save the game!\n";
+    if (!file) {
+        cout << "⚠️ Error: Could not save the game.\n";
         return;
     }
 
-    for (string item : inventory) {
-        file << item << "\n";  // Ensure each item is on a new line
+    for (const auto& item : inventory) {
+        file << item << "\n";
     }
 
     file.close();
-    cout << "[Game Saved!]\n";
+    cout << "💾 Game saved!\n";
 }
 
-// Load game from file
+// Load inventory from a save file
 void loadGame() {
     inventory.clear();
-    ifstream file("savegame.txt"); // Open file for reading
+    ifstream file("savegame.txt");
 
-    if (!file) {  // Check if the file opened successfully
-        cout << "[Error] No saved game found!\n";
+    if (!file) {
+        cout << "⚠️ No saved game found.\n";
         return;
     }
 
     string item;
-    while (getline(file, item)) {  // Read each line and add to inventory
-        if (!item.empty()) {  
+    while (getline(file, item)) {
+        if (!item.empty()) {
             inventory.push_back(item);
         }
     }
 
     file.close();
-    cout << "[Game Loaded!]\n";
+    cout << "✅ Game loaded!\n";
 }
 
-// Random event generator
+// Random events during exploration
 void randomEvent() {
     srand(time(0));
-    int event = rand() % 3; // 3 possible events
-    if (event == 0) {
-        cout << "[Event] A shadow monster attacks! You barely escape!\n";
-    } else if (event == 1) {
-        cout << "[Event] You find a health potion!\n";
-        addItem("Health Potion");
-    } else {
-        cout << "[Event] You hear distant whispers... creepy!\n";
+    int event = rand() % 3;
+
+    switch (event) {
+        case 0:
+            cout << "👻 A shadowy figure appears... You barely escape!\n";
+            break;
+        case 1:
+            cout << "🧪 You find a health potion on the ground.\n";
+            addItem("Health Potion");
+            break;
+        case 2:
+            cout << "👂 You hear eerie whispers echoing through the cavern...\n";
+            break;
     }
 }
 
-// Randomized Puzzle: Solve a math equation
+// Generates a random math puzzle
 bool solvePuzzle() {
-    srand(time(0)); // Seed random number generator
-    int num1 = rand() % 10 + 1;  // Random number between 1 and 10
-    int num2 = rand() % 10 + 1;  // Random number between 1 and 10
+    srand(time(0));
+    int num1 = rand() % 10 + 1;
+    int num2 = rand() % 10 + 1;
     int correctAnswer = num1 + num2;
 
-    cout << "[Puzzle] A door blocks your path. Solve the riddle to pass.\n";
-    cout << "What is " << num1 << " + " << num2 << "? ";
+    cout << "\n🧩 A door with a magical lock blocks your path.\n";
+    cout << "Solve this: " << num1 << " + " << num2 << " = ?\n";
     
     int playerAnswer;
     cin >> playerAnswer;
 
     if (playerAnswer == correctAnswer) {
-        cout << "The puzzle is solved! You may proceed.\n";
-        return true;  // Puzzle solved
+        cout << "🔓 The door unlocks! You can proceed.\n";
+        return true;
     } else {
-        cout << "Wrong answer! The cavern shakes. Try again later.\n";
-        return false; // Puzzle failed
+        cout << "❌ Wrong answer! The cavern shakes... Try again later.\n";
+        return false;
     }
 }
 
-// Game exploration function
+// Exploration function
 void exploreCavern() {
-    cout << "[Exploring...]\n";
+    cout << "\n🔍 You venture deeper into the cavern...\n";
     randomEvent();
 
-    cout << "You find an old key on the ground. Pick it up? (yes/no): ";
+    cout << "🗝 You spot an old key on the ground. Pick it up? (yes/no): ";
     string pick;
     cin >> pick;
     if (pick == "yes") {
         addItem("Old Key");
     }
 
-    cout << "You reach a locked door. Try to unlock it? (yes/no): ";
+    cout << "🚪 You reach a locked door. Try to unlock it? (yes/no): ";
     string unlock;
     cin >> unlock;
 
-    if (unlock == "yes" && hasItem("Old Key")) {
-        cout << "You unlock the door with the key and move forward!\n";
-        if (solvePuzzle()) {
-            cout << "The puzzle is solved! You escape the cavern. YOU WIN!\n";
+    if (unlock == "yes") {
+        if (hasItem("Old Key")) {
+            cout << "✅ You unlock the door with the key and step forward...\n";
+            if (solvePuzzle()) {
+                cout << "🎉 You solved the puzzle and escaped the cavern! YOU WIN!\n";
+                exit(0);
+            } else {
+                cout << "❌ The puzzle remains unsolved. You are stuck.\n";
+            }
         } else {
-            cout << "Wrong answer! You remain trapped.\n";
+            cout << "❌ The door is locked. You need a key to proceed.\n";
         }
-    } else {
-        cout << "You need a key to unlock this door.\n";
     }
 }
 
-// Main game logic
+// Main game loop
 void playGame() {
-    cout << "Welcome to Cavern of Shadows!\n";
-    cout << "You wake up in a dark cavern. You must find a way out.\n";
+    cout << "🏰 Welcome to **Cavern of Shadows**!\n";
+    cout << "🌑 You wake up in a dark cavern with no memory of how you got here...\n";
+    cout << "Can you find a way out?\n";
 
     while (true) {
-        cout << "\n[Actions] (1) Explore, (2) Check Inventory, (3) Save Game, (4) Load Game, (5) Quit\n";
+        cout << "\n📜 What will you do?\n";
+        cout << "[1] Explore the cavern\n";
+        cout << "[2] Check inventory\n";
+        cout << "[3] Save game\n";
+        cout << "[4] Load game\n";
+        cout << "[5] Quit\n";
         cout << "Enter choice: ";
+        
         int choice;
         cin >> choice;
 
-        if (choice == 1) {  // Explore
-            exploreCavern();
-        }
-        else if (choice == 2) {  // Check Inventory
-            cout << "[Inventory]: ";
-            if (inventory.empty()) {
-                cout << "Your inventory is empty.\n";
-            } else {
-                for (string item : inventory) {
-                    cout << item << " ";
+        switch (choice) {
+            case 1:
+                exploreCavern();
+                break;
+            case 2:
+                if (inventory.empty()) {
+                    cout << "👜 Your inventory is empty.\n";
+                } else {
+                    cout << "🎒 Inventory: ";
+                    for (const auto& item : inventory) {
+                        cout << item << " ";
+                    }
+                    cout << "\n";
                 }
-                cout << "\n";
-            }
-        }
-        else if (choice == 3) {  // Save game
-            saveGame();
-        }
-        else if (choice == 4) {  // Load game
-            loadGame();
-        }
-        else if (choice == 5) {  // Quit
-            cout << "Exiting game...\n";
-            break;
-        }
-        else {
-            cout << "Invalid choice! Try again.\n";
+                break;
+            case 3:
+                saveGame();
+                break;
+            case 4:
+                loadGame();
+                break;
+            case 5:
+                cout << "👋 Exiting game... Goodbye!\n";
+                return;
+            default:
+                cout << "⚠️ Invalid choice. Try again.\n";
         }
     }
 }
